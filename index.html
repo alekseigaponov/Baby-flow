@@ -241,4 +241,68 @@
                     const sumL = lastLogs.reduce((s, i) => s + (i.breast_l || 0), 0);
                     const sumR = lastLogs.reduce((s, i) => s + (i.breast_r || 0), 0);
                     const total = sumL + sumR || 1;
-                    return { l: Math.round((sumL / total) * 100), r: Math.round((sum
+                    return { l: Math.round((sumL / total) * 100), r: Math.round((sumR / total) * 100) };
+                });
+
+                // --- СЕССИИ КОРМЛЕНИЯ ---
+                const startSession = () => {
+                    const now = new Date();
+                    activeSession.value = {
+                        date: now.toISOString().split('T')[0],
+                        time: now.toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'}),
+                        weight_before: currentWeight.value,
+                        weight_after_l: null, weight_after_r: null,
+                        breast_l: 0, breast_r: 0, formula: 0
+                    };
+                    tempWeight.value = currentWeight.value;
+                };
+
+                const saveStep = (side) => {
+                    if (!tempWeight.value || tempWeight.value <= 0) { alert("Введите корректный вес"); return; }
+                    if (side === 'l') {
+                        activeSession.value.weight_after_l = tempWeight.value;
+                        activeSession.value.breast_l = Math.max(0, Math.round((tempWeight.value - activeSession.value.weight_before) * 1000));
+                    } else {
+                        activeSession.value.weight_after_r = tempWeight.value;
+                        activeSession.value.breast_r = Math.max(0, Math.round((tempWeight.value - activeSession.value.weight_after_l) * 1000));
+                    }
+                };
+
+                const finishSession = () => {
+                    logs.value.push({...activeSession.value});
+                    saveLogs();
+                    activeSession.value = null;
+                    nextTick(() => updateChart());
+                };
+
+                const cancelSession = () => { if(confirm("Отменить запись?")) activeSession.value = null; };
+                const clearData = () => { if(confirm("Сбросить базу?")) { logs.value = rawDataset; localStorage.removeItem('babyFlowDataV6'); updateChart(); } };
+                const limitedLog = computed(() => [...logs.value].reverse().slice(0, 5));
+
+                const updateChart = () => {
+                    const ctx = document.getElementById('mainChart');
+                    if(!ctx) return;
+                    if (chart.value) chart.value.destroy();
+                    const chartData = logs.value.slice(-15);
+                    chart.value = new Chart(ctx.getContext('2d'), {
+                        type: 'line',
+                        data: {
+                            labels: chartData.map(d => d.time),
+                            datasets: [{
+                                data: chartData.map(d => getWeight(d)),
+                                borderColor: '#3b82f6', tension: 0.4, fill: false, borderWidth: 4, pointRadius: 0
+                            }]
+                        },
+                        options: { plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+                    });
+                };
+
+                return { 
+                    logs, activeSession, isNight, tempWeight, prediction, energyLevel, energyStatusText, balance, 
+                    currentWeight, calculateTotal, limitedLog, startSession, saveStep, finishSession, cancelSession, clearData, getWeight, formatDate 
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
