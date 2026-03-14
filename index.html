@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
     <title>FlowFinance</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="FlowFinance">
     <meta name="theme-color" content="#020617">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -15,71 +13,49 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     
     <style>
-        /* CORE VARIABLES */
         :root { 
-            --accent: #3b82f6; 
-            --bg: #020617; 
-            --panel: rgba(30, 41, 59, 0.6); 
-            --text-main: #f8fafc; 
-            --text-muted: #94a3b8; 
-            --border-color: rgba(255,255,255,0.08);
-            --bg-input: rgba(0,0,0,0.3);
+            --accent: #3b82f6; --bg: #020617; --panel: rgba(30, 41, 59, 0.6); 
+            --text-main: #f8fafc; --text-muted: #94a3b8; 
+            --border-color: rgba(255,255,255,0.08); --bg-input: rgba(0,0,0,0.3);
         }
-
-        /* LIGHT THEME */
         body.light-theme { 
-            --accent: #2563eb; 
-            --bg: #f1f5f9; 
-            --panel: rgba(255, 255, 255, 0.8); 
-            --text-main: #0f172a; 
-            --text-muted: #64748b; 
-            --border-color: rgba(0,0,0,0.06);
-            --bg-input: rgba(255,255,255,0.5);
+            --accent: #2563eb; --bg: #f1f5f9; --panel: rgba(255, 255, 255, 0.8); 
+            --text-main: #0f172a; --text-muted: #64748b; 
+            --border-color: rgba(0,0,0,0.06); --bg-input: rgba(255,255,255,0.5);
         }
 
         body { background: var(--bg); color: var(--text-main); font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; transition: background 0.4s, color 0.4s; min-height: 100vh; }
-        
-        body::before {
-            content: ''; position: fixed; top: -20%; right: -10%; width: 70%; height: 70%;
-            background: radial-gradient(circle, var(--accent) 0%, transparent 60%);
-            opacity: 0.15; z-index: -1; pointer-events: none;
-        }
-
+        body::before { content: ''; position: fixed; top: -20%; right: -10%; width: 70%; height: 70%; background: radial-gradient(circle, var(--accent) 0%, transparent 60%); opacity: 0.15; z-index: -1; pointer-events: none; }
         [v-cloak] { display: none !important; }
         
-        /* UI Components */
         .panel { background: var(--panel); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid var(--border-color); border-radius: 2rem; box-shadow: 0 10px 40px rgba(0,0,0,0.05); }
         .text-muted { color: var(--text-muted); }
-        
         .input-huge { background: transparent; border: none; font-size: 3.5rem; font-weight: 900; text-align: center; color: var(--text-main); width: 100%; outline: none; caret-color: var(--accent); }
         .input-huge::placeholder { color: var(--text-muted); opacity: 0.5; }
         .bg-input { background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); }
-        
         ::-webkit-scrollbar { display: none; }
         
-        /* Transitions */
+        /* Анимации окон */
         .slide-up-enter-active, .slide-up-leave-active { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .slide-up-enter-from, .slide-up-leave-to { opacity: 0; transform: translateY(40px) scale(0.95); }
         
-        /* --- SPLASH SCREEN & LOGO ANIMATIONS --- */
+        /* Splash Screen */
         .splash-enter-active, .splash-leave-active { transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
         .splash-leave-to { opacity: 0; transform: scale(1.05); pointer-events: none; }
-        
-        .logo-path {
-            stroke-dasharray: 150;
-            stroke-dashoffset: 150;
-            animation: drawLine 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-        }
-        .logo-arrow {
-            stroke-dasharray: 50;
-            stroke-dashoffset: 50;
-            animation: drawLine 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-            animation-delay: 1.2s; /* Starts after the main line */
-        }
+        .logo-path { stroke-dasharray: 150; stroke-dashoffset: 150; animation: drawLine 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .logo-arrow { stroke-dasharray: 50; stroke-dashoffset: 50; animation: drawLine 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; animation-delay: 1.2s; }
         @keyframes drawLine { to { stroke-dashoffset: 0; } }
-        
         .splash-text { opacity: 0; transform: translateY(10px); animation: fadeUp 0.8s ease forwards; animation-delay: 0.8s; }
         @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+        /* Каскадная анимация списков (Transition Group) */
+        .list-enter-active, .list-leave-active { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .list-enter-from { opacity: 0; transform: translateX(-30px); }
+        .list-leave-to { opacity: 0; transform: scale(0.9); }
+        
+        /* Настройка для свайпа (Swipe-to-delete) */
+        .swipe-item { touch-action: pan-y; }
+        .swipe-transition { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
 </head>
 <body class="pb-32 antialiased">
@@ -91,7 +67,9 @@
                     <svg viewBox="0 0 100 100" class="w-full h-full" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <defs>
                             <linearGradient id="flowGradient" x1="0%" y1="100%" x2="100%" y2="0%">
-                                <stop offset="0%" stop-color="#3b82f6" /> <stop offset="100%" stop-color="#10b981" /> </linearGradient>
+                                <stop offset="0%" stop-color="#3b82f6" />
+                                <stop offset="100%" stop-color="#10b981" />
+                            </linearGradient>
                         </defs>
                         <path class="logo-path" d="M 15 80 Q 40 80, 55 55 T 80 25" stroke="url(#flowGradient)" stroke-width="10" />
                         <path class="logo-arrow" d="M 55 25 L 80 25 L 80 50" stroke="#10b981" stroke-width="10" />
@@ -114,7 +92,6 @@
                         </svg>
                         <h1 class="text-2xl font-900 tracking-tighter">Flow<span class="text-blue-500">Finance</span></h1>
                     </div>
-                    
                     <div class="flex gap-2 overflow-x-auto mt-3 no-scrollbar" v-if="transactions.length > 0">
                         <button v-for="m in availableMonths" :key="m.val" @click="activeMonth = m.val" 
                                 class="text-[10px] font-bold px-4 py-1.5 rounded-full border transition-all whitespace-nowrap"
@@ -123,12 +100,11 @@
                         </button>
                     </div>
                 </div>
-                
                 <div class="flex gap-2 self-start mt-1">
-                    <button @click="toggleTheme" class="w-10 h-10 rounded-full panel flex items-center justify-center text-xl active:scale-90 transition-transform shadow-sm">
+                    <button @click="toggleTheme" class="w-10 h-10 rounded-full panel flex items-center justify-center text-xl active:scale-90 transition-transform">
                         {{ isLight ? '🌙' : '☀️' }}
                     </button>
-                    <button @click="showSettings = !showSettings" class="w-10 h-10 rounded-full panel flex items-center justify-center text-xl active:scale-90 transition-transform shadow-sm">
+                    <button @click="showSettings = !showSettings" class="w-10 h-10 rounded-full panel flex items-center justify-center text-xl active:scale-90 transition-transform">
                         ⚙️
                     </button>
                 </div>
@@ -164,59 +140,58 @@
                                     <polyline fill="none" stroke="currentColor" stroke-width="2.5" :points="sparklinePoints" stroke-linejoin="round" stroke-linecap="round"/>
                                 </svg>
                             </div>
-
                             <div class="relative z-10 flex justify-between items-start">
                                 <div>
                                     <p class="text-[10px] text-muted font-bold uppercase tracking-widest mb-1">Баланс месяца</p>
-                                    <div class="text-5xl font-900 tracking-tighter" :class="monthBalance >= 0 ? '' : 'text-rose-500'">
-                                        {{ monthBalance >= 0 ? '+' : '' }}{{ monthBalance.toFixed(2) }}<span class="text-xl text-blue-500 ml-1">€</span>
-                                    </div>
-                                    <div class="mt-2 text-[11px] font-bold flex items-center gap-1" :class="forecast.save >= 0 ? 'text-green-500' : 'text-rose-500'">
-                                        Прогноз: {{ forecast.save >= 0 ? '+' : '' }}{{ forecast.save.toFixed(0) }} €
+                                    <div class="text-5xl font-900 tracking-tighter" :class="animatedBalance >= 0 ? '' : 'text-rose-500'">
+                                        {{ animatedBalance >= 0 ? '+' : '' }}{{ animatedBalance.toFixed(2) }}<span class="text-xl text-blue-500 ml-1">€</span>
                                     </div>
                                 </div>
                                 <div class="text-right">
                                     <p class="text-[10px] text-muted font-bold uppercase tracking-widest mb-1">Трата</p>
                                     <div class="text-2xl font-900">{{ forecast.daily.toFixed(0) }}</div>
-                                    <p class="text-[10px] text-muted mt-1 font-semibold">€ в день</p>
+                                    <p class="text-[10px] text-muted mt-1 font-semibold">€ / день</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="panel p-5">
-                                <p class="text-[10px] text-muted font-bold uppercase tracking-widest mb-2">Доходы</p>
-                                <p class="text-xl font-900 text-green-500">+{{ monthIncome.toFixed(0) }} €</p>
-                            </div>
-                            <div class="panel p-5">
-                                <p class="text-[10px] text-muted font-bold uppercase tracking-widest mb-2">Расходы</p>
-                                <p class="text-xl font-900 text-rose-500">-{{ monthExpense.toFixed(0) }} €</p>
-                            </div>
-                        </div>
-
-                        <div class="panel p-6 mt-4 flex-1">
-                            <h2 class="text-[10px] text-muted font-bold uppercase tracking-widest mb-6">Хронология</h2>
+                        <div class="mt-8 flex-1">
+                            <h2 class="text-[10px] text-muted font-bold uppercase tracking-widest mb-6 ml-4">Хронология</h2>
                             
-                            <div class="relative border-l-2 ml-3 space-y-8" style="border-color: var(--border-color)">
-                                <div v-for="t in filteredTxs.slice(0, 20)" :key="t.id" class="relative pl-6 group">
-                                    <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full border-4" 
-                                         :style="{ backgroundColor: isLight ? '#fff' : '#000', borderColor: t.amount > 0 ? '#10b981' : getCatColor(t.cat) }"></div>
-                                    
-                                    <div class="flex justify-between items-start">
-                                        <div>
-                                            <h3 class="font-900 text-lg leading-none" :class="t.amount > 0 ? 'text-green-500' : ''">
-                                                {{ t.amount > 0 ? '+' : '' }}{{ t.amount.toFixed(2) }} €
-                                            </h3>
-                                            <p class="text-sm font-bold mt-2 flex items-center gap-1.5" :class="isLight ? 'text-gray-600' : 'text-gray-300'">
-                                                {{ getCatIcon(t.cat) }} {{ t.name }}
-                                            </p>
+                            <div class="space-y-4">
+                                <transition-group name="list">
+                                    <div v-for="t in filteredTxs.slice(0, 20)" :key="t.id" class="relative overflow-hidden rounded-3xl swipe-item bg-rose-500">
+                                        <div class="absolute inset-0 flex justify-end items-center px-6">
+                                            <span class="text-white font-900 text-xs tracking-widest flex items-center gap-2">
+                                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                УДАЛИТЬ
+                                            </span>
                                         </div>
-                                        <div class="text-right">
-                                            <span class="text-xs font-800 text-muted">{{ formatDate(t.date) }}</span>
-                                            <button @click="deleteTx(t.id)" class="block mt-2 text-[10px] text-rose-500 font-bold uppercase opacity-0 group-hover:opacity-100 transition-opacity ml-auto px-2 py-1 rounded-md" style="background: rgba(244,63,94,0.1)">Удалить</button>
+                                        
+                                        <div class="panel p-5 relative flex justify-between items-center w-full"
+                                             :class="{ 'swipe-transition': !swipeState[t.id]?.swiping }"
+                                             :style="{ transform: `translateX(${swipeState[t.id]?.offset || 0}px)` }"
+                                             @touchstart="onTouchStart($event, t.id)"
+                                             @touchmove="onTouchMove($event, t.id)"
+                                             @touchend="onTouchEnd($event, t.id)">
+                                            
+                                            <div class="flex items-center gap-4">
+                                                <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-sm" :style="{ background: isLight ? '#fff' : 'rgba(0,0,0,0.3)', border: `1px solid ${getCatColor(t.cat)}50` }">
+                                                    {{ getCatIcon(t.cat) }}
+                                                </div>
+                                                <div>
+                                                    <h3 class="font-900 text-base leading-none">{{ t.name }}</h3>
+                                                    <p class="text-[10px] font-bold mt-1 text-muted">{{ formatDate(t.date) }}</p>
+                                                </div>
+                                            </div>
+                                            <div class="text-right">
+                                                <span class="text-lg font-900" :class="t.amount > 0 ? 'text-green-500' : ''">
+                                                    {{ t.amount > 0 ? '+' : '' }}{{ t.amount.toFixed(2) }} €
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                </transition-group>
                             </div>
                         </div>
                     </template>
@@ -277,25 +252,15 @@
                         <button @click="showSettings = false" class="w-8 h-8 flex items-center justify-center bg-input rounded-full font-bold">✕</button>
                     </div>
                     <div class="space-y-6">
-                        
                         <div class="p-5 bg-input rounded-2xl">
                             <div class="flex items-center gap-3 mb-3"><span class="text-2xl">💾</span><h3 class="font-900 text-sm">Бэкап базы данных</h3></div>
                             <p class="text-[11px] text-muted mb-4 font-semibold">Сохраняйте данные в JSON-файл или загружайте историю из старой версии.</p>
                             <div class="flex gap-2">
-                                <button @click="exportJSON" class="flex-1 py-3 bg-white/10 rounded-xl font-900 text-xs tracking-widest uppercase active:scale-95 transition-transform border border-white/10 hover:bg-white/20">Экспорт</button>
-                                <button @click="triggerJSON" class="flex-1 py-3 bg-blue-600 text-white rounded-xl font-900 text-xs tracking-widest uppercase active:scale-95 transition-transform shadow-lg shadow-blue-500/30">Импорт</button>
+                                <button @click="exportJSON" class="flex-1 py-3 bg-white/10 rounded-xl font-900 text-xs tracking-widest uppercase active:scale-95 transition-transform">Экспорт</button>
+                                <button @click="triggerJSON" class="flex-1 py-3 bg-blue-600 text-white rounded-xl font-900 text-xs tracking-widest uppercase active:scale-95 transition-transform">Импорт</button>
                                 <input type="file" id="jsonFile" accept=".json" @change="importJSON" class="hidden">
                             </div>
-                            <p v-if="jsonMsg" class="text-[10px] text-green-500 mt-3 text-center font-bold">{{ jsonMsg }}</p>
                         </div>
-
-                        <div class="p-5 bg-input rounded-2xl">
-                            <div class="flex items-center gap-3 mb-3"><span class="text-2xl">🏦</span><h3 class="font-900 text-sm">Импорт выписки</h3></div>
-                            <input type="file" id="csvFile" accept=".csv" @change="importCSV" class="hidden">
-                            <button @click="triggerCSV" class="w-full py-4 panel rounded-xl font-900 text-xs tracking-widest uppercase active:scale-95 transition-transform">Выбрать CSV файл</button>
-                            <p v-if="importMsg" class="text-[10px] text-green-500 mt-3 text-center font-bold">{{ importMsg }}</p>
-                        </div>
-
                         <div class="p-5 bg-input rounded-2xl">
                             <div class="flex items-center gap-3 mb-3"><span class="text-2xl">⚠️</span><h3 class="font-900 text-sm text-rose-500">Сброс данных</h3></div>
                             <button @click="hardReset" class="w-full py-4 text-rose-500 rounded-xl font-900 text-xs tracking-widest uppercase active:scale-95 transition-transform" style="background: rgba(244,63,94,0.1)">Очистить базу</button>
@@ -310,17 +275,15 @@
                 </button>
             </div>
             
-        </div> </div>
+        </div>
+    </div>
 
     <script>
-        const { createApp, ref, computed, onMounted, nextTick } = Vue;
+        const { createApp, ref, computed, watch, onMounted, nextTick } = Vue;
 
         createApp({
             setup() {
-                // --- SPLASH SCREEN STATE ---
                 const appLoaded = ref(false);
-
-                // CATEGORIES
                 const DEFAULT_CATS = [
                     {name:'Продукты', icon:'🛒', color:'#f97316'}, {name:'Транспорт', icon:'⛽', color:'#3b82f6'},
                     {name:'Аптека', icon:'💊', color:'#f43f5e'}, {name:'Рестораны', icon:'🍕', color:'#facc15'},
@@ -331,7 +294,6 @@
                     {name:'Прочее', icon:'📦', color:'#6b7280'}
                 ];
 
-                // STORAGE V5 (Preserving your data from previous version)
                 let initialTxs = [], initialCats = [];
                 try { 
                     initialTxs = JSON.parse(localStorage.getItem('financeX_v5')) || []; 
@@ -340,37 +302,30 @@
                 
                 const transactions = ref(Array.isArray(initialTxs) ? initialTxs : []);
                 const categories = ref(initialCats.length ? initialCats : [...DEFAULT_CATS]);
-                
                 const activeMonth = ref(new Date().toISOString().slice(0, 7));
                 const isLight = ref(localStorage.getItem('financeX_theme') === 'light');
-                
                 const sessionMode = ref(false);
                 const showSettings = ref(false);
                 const currentStep = ref(1);
                 const mainInput = ref(null);
-                const importMsg = ref('');
-                const jsonMsg = ref('');
                 const wizard = ref({ type: 'expense', amount: '', category: '', name: '', date: '' });
 
-                // ON MOUNT ANIMATION DELAY
                 onMounted(() => { 
                     if(isLight.value) document.body.classList.add('light-theme'); 
-                    // Скрываем анимацию загрузки через 2.2 секунды
                     setTimeout(() => { appLoaded.value = true; }, 2200);
                 });
 
-                // THEME
                 const toggleTheme = () => {
                     isLight.value = !isLight.value;
                     localStorage.setItem('financeX_theme', isLight.value ? 'light' : 'dark');
                     document.body.classList.toggle('light-theme', isLight.value);
                 };
 
-                // UTILS
                 const saveData = () => {
                     localStorage.setItem('financeX_v5', JSON.stringify(transactions.value));
                     localStorage.setItem('financeX_cats_v5', JSON.stringify(categories.value));
                 };
+
                 const getCatIcon = (n) => categories.value.find(c => c.name === n)?.icon || '📦';
                 const getCatColor = (n) => categories.value.find(c => c.name === n)?.color || '#3b82f6';
                 const formatDate = (d) => (d || '').split('-').reverse().join('.');
@@ -378,21 +333,65 @@
                 const availableMonths = computed(() => {
                     const txs = transactions.value;
                     if (!txs || txs.length === 0) return [{val: activeMonth.value, label: activeMonth.value}];
-                    try {
-                        const mSet = new Set(txs.map(t => (t.date || '').slice(0,7)).filter(Boolean));
-                        mSet.add(new Date().toISOString().slice(0, 7)); 
-                        return Array.from(mSet).sort().reverse().map(m => {
-                            const [y, mo] = m.split('-');
-                            const mNames = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
-                            return { val: m, label: `${mNames[parseInt(mo)-1] || ''} ${y}` };
-                        });
-                    } catch(e) { return [{val: activeMonth.value, label: activeMonth.value}]; }
+                    const mSet = new Set(txs.map(t => (t.date || '').slice(0,7)).filter(Boolean));
+                    mSet.add(new Date().toISOString().slice(0, 7)); 
+                    return Array.from(mSet).sort().reverse().map(m => {
+                        const [y, mo] = m.split('-');
+                        const mNames = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+                        return { val: m, label: `${mNames[parseInt(mo)-1] || ''} ${y}` };
+                    });
                 });
 
                 const filteredTxs = computed(() => transactions.value.filter(t => (t.date||'').startsWith(activeMonth.value)).sort((a,b) => (b.date||'').localeCompare(a.date||'')));
                 const monthIncome = computed(() => filteredTxs.value.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0));
                 const monthExpense = computed(() => filteredTxs.value.filter(t => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0));
                 const monthBalance = computed(() => monthIncome.value - monthExpense.value);
+
+                // --- АНИМАЦИЯ БАЛАНСА (Number Ticker) ---
+                const animatedBalance = ref(0);
+                watch(monthBalance, (newVal) => {
+                    const start = animatedBalance.value;
+                    const dist = newVal - start;
+                    const duration = 500;
+                    let startT = null;
+                    const animate = (t) => {
+                        if (!startT) startT = t;
+                        const p = Math.min((t - startT) / duration, 1);
+                        const ease = 1 - Math.pow(1 - p, 4); // easeOutQuart
+                        animatedBalance.value = start + dist * ease;
+                        if (p < 1) requestAnimationFrame(animate);
+                        else animatedBalance.value = newVal;
+                    };
+                    requestAnimationFrame(animate);
+                }, { immediate: true });
+
+
+                // --- SWIPE TO DELETE ---
+                const swipeState = ref({});
+                const onTouchStart = (e, id) => {
+                    if (!swipeState.value[id]) swipeState.value[id] = { offset: 0 };
+                    swipeState.value[id].startX = e.touches[0].clientX - swipeState.value[id].offset;
+                    swipeState.value[id].swiping = true;
+                };
+                const onTouchMove = (e, id) => {
+                    if (!swipeState.value[id]?.swiping) return;
+                    let diff = e.touches[0].clientX - swipeState.value[id].startX;
+                    if (diff > 0) diff = 0; // Свайп только влево
+                    swipeState.value[id].offset = diff;
+                };
+                const onTouchEnd = (e, id) => {
+                    if (!swipeState.value[id]) return;
+                    swipeState.value[id].swiping = false;
+                    // Если смахнули больше чем на 80px — открываем кнопку, иначе закрываем
+                    if (swipeState.value[id].offset < -80) swipeState.value[id].offset = -120;
+                    else swipeState.value[id].offset = 0;
+                };
+
+                const deleteTx = (id) => {
+                    transactions.value = transactions.value.filter(t => t.id !== id);
+                    delete swipeState.value[id];
+                    saveData();
+                };
 
                 const sparklinePoints = computed(() => {
                     const txs = filteredTxs.value.slice().sort((a,b) => (a.date||'').localeCompare(b.date||'')); 
@@ -414,11 +413,10 @@
 
                 const smartInsight = computed(() => {
                     if(monthExpense.value === 0) return "Внесите ваши первые расходы, чтобы ИИ начал анализ ваших привычек.";
-                    if(forecast.value.save < 0) return `Внимание: при текущем темпе трат вы уйдете в минус на ${Math.abs(forecast.value.save).toFixed(0)}€. Попробуйте немного сократить расходы.`;
-                    return `Отличный темп! Если продолжите так же, к концу месяца у вас останется примерно ${forecast.value.save.toFixed(0)}€.`;
+                    if(forecast.value.save < 0) return `Внимание: при текущем темпе трат вы уйдете в минус на ${Math.abs(forecast.value.save).toFixed(0)}€.`;
+                    return `Отличный темп! К концу месяца у вас останется примерно ${forecast.value.save.toFixed(0)}€.`;
                 });
 
-                // WIZARD
                 const startSession = () => {
                     wizard.value = { type: 'expense', amount: '', category: '', name: '', date: new Date().toISOString().split('T')[0] };
                     currentStep.value = 1; sessionMode.value = true;
@@ -436,21 +434,12 @@
                         saveData(); sessionMode.value = false; window.scrollTo({top: 0});
                     }
                 };
-                const deleteTx = (id) => { if(confirm('Безвозвратно удалить?')) { transactions.value = transactions.value.filter(t => t.id !== id); saveData(); } };
                 
-                // BACKUP JSON LOGIC 
                 const exportJSON = () => {
-                    const data = {
-                        version: 5,
-                        exportedAt: new Date().toISOString(),
-                        transactions: transactions.value,
-                        categories: categories.value,
-                    };
+                    const data = { version: 5, exportedAt: new Date().toISOString(), transactions: transactions.value, categories: categories.value };
                     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                    const a = document.createElement('a');
-                    a.href = URL.createObjectURL(blob);
-                    a.download = `flowfinance-${new Date().toISOString().slice(0, 10)}.json`;
-                    a.click(); URL.revokeObjectURL(a.href);
+                    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+                    a.download = `flowfinance-${new Date().toISOString().slice(0, 10)}.json`; a.click(); URL.revokeObjectURL(a.href);
                 };
 
                 const triggerJSON = () => document.getElementById('jsonFile').click();
@@ -460,66 +449,16 @@
                     r.onload = (ev) => {
                         try {
                             const p = JSON.parse(ev.target.result);
-                            if (!p.transactions || !Array.isArray(p.transactions)) throw new Error('Bad format');
-                            
                             const existingIds = new Set(transactions.value.map(t => t.id));
                             const newTxs = p.transactions.filter(t => !existingIds.has(t.id));
                             transactions.value = [...transactions.value, ...newTxs].sort((a,b) => b.date.localeCompare(a.date));
-                            
-                            const catsMap = new Map(categories.value.map(c => [c.name, c]));
-                            if (p.customCategories) p.customCategories.forEach(c => !catsMap.has(c.name) && catsMap.set(c.name, c));
-                            if (p.CAT_ICONS) {
-                                Object.entries(p.CAT_ICONS).forEach(([name, icon]) => {
-                                    if (!catsMap.has(name)) catsMap.set(name, { name, icon, color: (p.CAT_COLORS && p.CAT_COLORS[name]) || '#3b82f6' });
-                                });
-                            }
-                            if (p.categories) p.categories.forEach(c => !catsMap.has(c.name) && catsMap.set(c.name, c));
-                            
-                            categories.value = Array.from(catsMap.values());
-                            
-                            saveData();
-                            jsonMsg.value = `УСПЕХ: +${newTxs.length} операций.`;
-                            setTimeout(() => { showSettings.value = false; jsonMsg.value = ''; }, 2000);
-                        } catch(err) {
-                            jsonMsg.value = `ОШИБКА: Файл поврежден.`;
-                        }
-                    };
-                    r.readAsText(file);
-                };
-
-                // CSV
-                const triggerCSV = () => document.getElementById('csvFile').click();
-                const importCSV = (e) => {
-                    const file = e.target.files[0]; if (!file) return;
-                    const r = new FileReader();
-                    r.onload = (ev) => {
-                        try {
-                            const lines = ev.target.result.split(/\r?\n/).filter(l => l.trim());
-                            const delim = lines[0].includes(';') ? ';' : ',';
-                            let added = 0;
-                            for(let i=1; i<lines.length; i++) {
-                                const cols = lines[i].split(delim).map(c => c.replace(/^"|"$/g, '').trim());
-                                if(cols.length < 5) continue;
-                                const dateMatch = cols.find(c => c.match(/^\d{2}\.\d{2}\.\d{4}$/)); if(!dateMatch) continue;
-                                const date = dateMatch.split('.').reverse().join('-');
-                                const amtStr = cols.find(c => c.match(/^-?\d+[,.]\d{2}$/)); if(!amtStr) continue;
-                                const amt = parseFloat(amtStr.replace(',', '.'));
-                                const name = cols[3] || cols[2] || 'Swedbank TX';
-                                if(!transactions.value.some(t => t.date === date && t.amount === amt && t.name === name)) {
-                                    transactions.value.unshift({ id: Date.now() + i, name, amount: amt, date, cat: 'Прочее' });
-                                    added++;
-                                }
-                            }
-                            saveData(); importMsg.value = `УСПЕХ: +${added} операций.`;
-                            setTimeout(() => { showSettings.value = false; importMsg.value = ''; }, 2000);
-                        } catch(err) { importMsg.value = `ОШИБКА формата.`; }
-                    };
-                    r.readAsText(file, 'UTF-8');
+                            saveData(); showSettings.value = false;
+                        } catch(err) { alert('Ошибка загрузки файла'); }
+                    }; r.readAsText(file);
                 };
 
                 const hardReset = () => { if(confirm("Удалить ВСЁ?")) { transactions.value = []; categories.value = [...DEFAULT_CATS]; saveData(); showSettings.value = false; } };
 
-                // DEMO
                 const loadDemoData = () => {
                     const demo = []; const now = new Date(); const y = now.getFullYear(); const m = String(now.getMonth() + 1).padStart(2, '0');
                     demo.push({ id: 1, name: 'Зарплата Google', amount: 4500, cat: 'Зарплата', date: `${y}-${m}-01` });
@@ -534,10 +473,11 @@
 
                 return { 
                     appLoaded, transactions, categories, activeMonth, availableMonths, filteredTxs,
-                    monthIncome, monthExpense, monthBalance, sparklinePoints, forecast, smartInsight,
+                    monthIncome, monthExpense, monthBalance, animatedBalance, sparklinePoints, forecast, smartInsight,
                     sessionMode, showSettings, currentStep, wizard, mainInput, isLight, toggleTheme,
                     startSession, selectCategory, nextStep, deleteTx, getCatIcon, getCatColor, formatDate, 
-                    triggerCSV, importCSV, importMsg, exportJSON, triggerJSON, importJSON, jsonMsg, hardReset, loadDemoData
+                    swipeState, onTouchStart, onTouchMove, onTouchEnd,
+                    exportJSON, triggerJSON, importJSON, hardReset, loadDemoData
                 };
             }
         }).mount('#app');
