@@ -35,11 +35,9 @@
         .bg-input { background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); }
         ::-webkit-scrollbar { display: none; }
         
-        /* Анимации окон */
         .slide-up-enter-active, .slide-up-leave-active { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .slide-up-enter-from, .slide-up-leave-to { opacity: 0; transform: translateY(40px) scale(0.95); }
         
-        /* Splash Screen */
         .splash-enter-active, .splash-leave-active { transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
         .splash-leave-to { opacity: 0; transform: scale(1.05); pointer-events: none; }
         .logo-path { stroke-dasharray: 150; stroke-dashoffset: 150; animation: drawLine 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
@@ -48,12 +46,10 @@
         .splash-text { opacity: 0; transform: translateY(10px); animation: fadeUp 0.8s ease forwards; animation-delay: 0.8s; }
         @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
 
-        /* Каскадная анимация списков (Transition Group) */
         .list-enter-active, .list-leave-active { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .list-enter-from { opacity: 0; transform: translateX(-30px); }
         .list-leave-to { opacity: 0; transform: scale(0.9); }
         
-        /* Настройка для свайпа (Swipe-to-delete) */
         .swipe-item { touch-action: pan-y; }
         .swipe-transition { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
@@ -158,41 +154,47 @@
                         <div class="mt-8 flex-1">
                             <h2 class="text-[10px] text-muted font-bold uppercase tracking-widest mb-6 ml-4">Хронология</h2>
                             
-                            <div class="space-y-4">
-                                <transition-group name="list">
-                                    <div v-for="t in filteredTxs.slice(0, 20)" :key="t.id" class="relative overflow-hidden rounded-3xl swipe-item bg-rose-500">
-                                        <div class="absolute inset-0 flex justify-end items-center px-6">
-                                            <span class="text-white font-900 text-xs tracking-widest flex items-center gap-2">
-                                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                                УДАЛИТЬ
+                            <transition-group name="list" tag="div" class="space-y-4">
+                                <div v-for="t in filteredTxs.slice(0, 20)" :key="t.id" class="relative overflow-hidden rounded-3xl swipe-item">
+                                    
+                                    <div class="absolute inset-0 flex justify-end items-center px-6 cursor-pointer"
+                                         :style="{
+                                             backgroundColor: '#f43f5e',
+                                             opacity: Math.min(1, Math.abs(swipeState[t.id]?.offset || 0) / 80),
+                                             pointerEvents: (swipeState[t.id]?.offset || 0) < -40 ? 'auto' : 'none'
+                                         }"
+                                         @click="deleteTx(t.id)">
+                                        <span class="text-white font-900 text-xs tracking-widest flex items-center gap-2 transition-transform duration-300"
+                                              :style="{ transform: `scale(${Math.min(1, Math.abs(swipeState[t.id]?.offset || 0) / 80)})` }">
+                                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                            УДАЛИТЬ
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="panel p-5 relative flex justify-between items-center w-full"
+                                         :class="{ 'swipe-transition': !swipeState[t.id]?.swiping }"
+                                         :style="{ transform: `translateX(${swipeState[t.id]?.offset || 0}px)` }"
+                                         @touchstart="onTouchStart($event, t.id)"
+                                         @touchmove="onTouchMove($event, t.id)"
+                                         @touchend="onTouchEnd($event, t.id)">
+                                        
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-sm" :style="{ background: isLight ? '#fff' : 'rgba(0,0,0,0.3)', border: `1px solid ${getCatColor(t.cat)}50` }">
+                                                {{ getCatIcon(t.cat) }}
+                                            </div>
+                                            <div>
+                                                <h3 class="font-900 text-base leading-none">{{ t.name }}</h3>
+                                                <p class="text-[10px] font-bold mt-1 text-muted">{{ formatDate(t.date) }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-lg font-900" :class="t.amount > 0 ? 'text-green-500' : ''">
+                                                {{ t.amount > 0 ? '+' : '' }}{{ t.amount.toFixed(2) }} €
                                             </span>
                                         </div>
-                                        
-                                        <div class="panel p-5 relative flex justify-between items-center w-full"
-                                             :class="{ 'swipe-transition': !swipeState[t.id]?.swiping }"
-                                             :style="{ transform: `translateX(${swipeState[t.id]?.offset || 0}px)` }"
-                                             @touchstart="onTouchStart($event, t.id)"
-                                             @touchmove="onTouchMove($event, t.id)"
-                                             @touchend="onTouchEnd($event, t.id)">
-                                            
-                                            <div class="flex items-center gap-4">
-                                                <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-sm" :style="{ background: isLight ? '#fff' : 'rgba(0,0,0,0.3)', border: `1px solid ${getCatColor(t.cat)}50` }">
-                                                    {{ getCatIcon(t.cat) }}
-                                                </div>
-                                                <div>
-                                                    <h3 class="font-900 text-base leading-none">{{ t.name }}</h3>
-                                                    <p class="text-[10px] font-bold mt-1 text-muted">{{ formatDate(t.date) }}</p>
-                                                </div>
-                                            </div>
-                                            <div class="text-right">
-                                                <span class="text-lg font-900" :class="t.amount > 0 ? 'text-green-500' : ''">
-                                                    {{ t.amount > 0 ? '+' : '' }}{{ t.amount.toFixed(2) }} €
-                                                </span>
-                                            </div>
-                                        </div>
                                     </div>
-                                </transition-group>
-                            </div>
+                                </div>
+                            </transition-group>
                         </div>
                     </template>
                 </div>
@@ -333,13 +335,15 @@
                 const availableMonths = computed(() => {
                     const txs = transactions.value;
                     if (!txs || txs.length === 0) return [{val: activeMonth.value, label: activeMonth.value}];
-                    const mSet = new Set(txs.map(t => (t.date || '').slice(0,7)).filter(Boolean));
-                    mSet.add(new Date().toISOString().slice(0, 7)); 
-                    return Array.from(mSet).sort().reverse().map(m => {
-                        const [y, mo] = m.split('-');
-                        const mNames = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
-                        return { val: m, label: `${mNames[parseInt(mo)-1] || ''} ${y}` };
-                    });
+                    try {
+                        const mSet = new Set(txs.map(t => (t.date || '').slice(0,7)).filter(Boolean));
+                        mSet.add(new Date().toISOString().slice(0, 7)); 
+                        return Array.from(mSet).sort().reverse().map(m => {
+                            const [y, mo] = m.split('-');
+                            const mNames = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+                            return { val: m, label: `${mNames[parseInt(mo)-1] || ''} ${y}` };
+                        });
+                    } catch(e) { return [{val: activeMonth.value, label: activeMonth.value}]; }
                 });
 
                 const filteredTxs = computed(() => transactions.value.filter(t => (t.date||'').startsWith(activeMonth.value)).sort((a,b) => (b.date||'').localeCompare(a.date||'')));
@@ -347,7 +351,7 @@
                 const monthExpense = computed(() => filteredTxs.value.filter(t => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0));
                 const monthBalance = computed(() => monthIncome.value - monthExpense.value);
 
-                // --- АНИМАЦИЯ БАЛАНСА (Number Ticker) ---
+                // АНИМАЦИЯ БАЛАНСА
                 const animatedBalance = ref(0);
                 watch(monthBalance, (newVal) => {
                     const start = animatedBalance.value;
@@ -357,7 +361,7 @@
                     const animate = (t) => {
                         if (!startT) startT = t;
                         const p = Math.min((t - startT) / duration, 1);
-                        const ease = 1 - Math.pow(1 - p, 4); // easeOutQuart
+                        const ease = 1 - Math.pow(1 - p, 4);
                         animatedBalance.value = start + dist * ease;
                         if (p < 1) requestAnimationFrame(animate);
                         else animatedBalance.value = newVal;
@@ -365,8 +369,7 @@
                     requestAnimationFrame(animate);
                 }, { immediate: true });
 
-
-                // --- SWIPE TO DELETE ---
+                // ИДЕАЛЬНЫЙ SWIPE TO DELETE
                 const swipeState = ref({});
                 const onTouchStart = (e, id) => {
                     if (!swipeState.value[id]) swipeState.value[id] = { offset: 0 };
@@ -376,15 +379,20 @@
                 const onTouchMove = (e, id) => {
                     if (!swipeState.value[id]?.swiping) return;
                     let diff = e.touches[0].clientX - swipeState.value[id].startX;
-                    if (diff > 0) diff = 0; // Свайп только влево
+                    if (diff > 0) diff = 0; // Тянем только влево
+                    // Rubber band эффект (сопротивление после -120px)
+                    if (diff < -120) diff = -120 - (Math.abs(diff) - 120) * 0.2;
                     swipeState.value[id].offset = diff;
                 };
                 const onTouchEnd = (e, id) => {
                     if (!swipeState.value[id]) return;
                     swipeState.value[id].swiping = false;
-                    // Если смахнули больше чем на 80px — открываем кнопку, иначе закрываем
-                    if (swipeState.value[id].offset < -80) swipeState.value[id].offset = -120;
-                    else swipeState.value[id].offset = 0;
+                    // Если утянули дальше -70px, фиксируем панель открытой
+                    if (swipeState.value[id].offset < -70) {
+                        swipeState.value[id].offset = -110;
+                    } else {
+                        swipeState.value[id].offset = 0;
+                    }
                 };
 
                 const deleteTx = (id) => {
