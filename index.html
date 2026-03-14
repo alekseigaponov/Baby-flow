@@ -36,7 +36,6 @@
 
         body { background: var(--bg); color: var(--text-main); font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; transition: background 0.4s, color 0.4s; min-height: 100vh; }
         
-        /* Premium Background Gradient */
         body::before {
             content: ''; position: fixed; top: -20%; right: -10%; width: 70%; height: 70%;
             background: radial-gradient(circle, var(--accent) 0%, transparent 60%);
@@ -88,14 +87,13 @@
                 <div v-if="transactions.length === 0" class="panel p-8 flex flex-col items-center justify-center text-center mt-6 shadow-lg border-blue-500/30">
                     <span class="text-6xl mb-6 animate-bounce" style="animation-duration: 2s;">🚀</span>
                     <h3 class="text-xl font-900 mb-3">Всё готово к работе</h3>
-                    <p class="text-xs text-muted mb-8 leading-relaxed">Начните вести учет с чистого листа, нажав «Внести», или посмотрите, как приложение работает вживую, загрузив демо-данные.</p>
+                    <p class="text-xs text-muted mb-8 leading-relaxed">Внесите расходы вручную, восстановите бэкап из настроек или запустите демо-режим.</p>
                     <button @click="loadDemoData" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-900 text-xs tracking-widest uppercase active:scale-95 transition-transform shadow-lg shadow-blue-500/30">
                         Посмотреть демо
                     </button>
                 </div>
 
                 <template v-else>
-                    
                     <div class="panel p-5 relative overflow-hidden group">
                         <div class="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-50"></div>
                         <div class="relative z-10">
@@ -147,7 +145,7 @@
                         <h2 class="text-[10px] text-muted font-bold uppercase tracking-widest mb-6">Хронология</h2>
                         
                         <div class="relative border-l-2 ml-3 space-y-8" style="border-color: var(--border-color)">
-                            <div v-for="t in filteredTxs.slice(0, 15)" :key="t.id" class="relative pl-6 group">
+                            <div v-for="t in filteredTxs.slice(0, 20)" :key="t.id" class="relative pl-6 group">
                                 <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full border-4" 
                                      :style="{ backgroundColor: isLight ? '#fff' : '#000', borderColor: t.amount > 0 ? '#10b981' : getCatColor(t.cat) }"></div>
                                 
@@ -226,11 +224,22 @@
                     <button @click="showSettings = false" class="w-8 h-8 flex items-center justify-center bg-input rounded-full font-bold">✕</button>
                 </div>
                 <div class="space-y-6">
+                    
                     <div class="p-5 bg-input rounded-2xl">
-                        <div class="flex items-center gap-3 mb-3"><span class="text-2xl">🏦</span><h3 class="font-900 text-sm">Импорт Swedbank</h3></div>
-                        <p class="text-[11px] text-muted mb-4 font-semibold">Загрузите вашу банковскую выписку в формате CSV.</p>
+                        <div class="flex items-center gap-3 mb-3"><span class="text-2xl">💾</span><h3 class="font-900 text-sm">Бэкап базы данных</h3></div>
+                        <p class="text-[11px] text-muted mb-4 font-semibold">Сохраняйте данные в JSON-файл или загружайте историю из старой версии.</p>
+                        <div class="flex gap-2">
+                            <button @click="exportJSON" class="flex-1 py-3 bg-white/10 rounded-xl font-900 text-xs tracking-widest uppercase active:scale-95 transition-transform border border-white/10 hover:bg-white/20">Экспорт</button>
+                            <button @click="triggerJSON" class="flex-1 py-3 bg-blue-600 text-white rounded-xl font-900 text-xs tracking-widest uppercase active:scale-95 transition-transform shadow-lg shadow-blue-500/30">Импорт</button>
+                            <input type="file" id="jsonFile" accept=".json" @change="importJSON" class="hidden">
+                        </div>
+                        <p v-if="jsonMsg" class="text-[10px] text-green-500 mt-3 text-center font-bold">{{ jsonMsg }}</p>
+                    </div>
+
+                    <div class="p-5 bg-input rounded-2xl">
+                        <div class="flex items-center gap-3 mb-3"><span class="text-2xl">🏦</span><h3 class="font-900 text-sm">Импорт выписки</h3></div>
                         <input type="file" id="csvFile" accept=".csv" @change="importCSV" class="hidden">
-                        <button @click="triggerCSV" class="w-full py-4 panel rounded-xl font-900 text-xs tracking-widest uppercase active:scale-95 transition-transform">Выбрать файл</button>
+                        <button @click="triggerCSV" class="w-full py-4 panel rounded-xl font-900 text-xs tracking-widest uppercase active:scale-95 transition-transform">Выбрать CSV файл</button>
                         <p v-if="importMsg" class="text-[10px] text-green-500 mt-3 text-center font-bold">{{ importMsg }}</p>
                     </div>
 
@@ -255,7 +264,7 @@
         createApp({
             setup() {
                 // CATEGORIES
-                const categories = ref([
+                const DEFAULT_CATS = [
                     {name:'Продукты', icon:'🛒', color:'#f97316'}, {name:'Транспорт', icon:'⛽', color:'#3b82f6'},
                     {name:'Аптека', icon:'💊', color:'#f43f5e'}, {name:'Рестораны', icon:'🍕', color:'#facc15'},
                     {name:'Одежда', icon:'👗', color:'#a855f7'}, {name:'Кредиты', icon:'🏦', color:'#ec4899'},
@@ -263,12 +272,18 @@
                     {name:'Переводы', icon:'💸', color:'#fcd34d'}, {name:'Здоровье', icon:'🏃', color:'#22c55e'},
                     {name:'Развлечения', icon:'🎮', color:'#ef4444'}, {name:'Дом', icon:'🏠', color:'#eab308'},
                     {name:'Прочее', icon:'📦', color:'#6b7280'}
-                ]);
+                ];
 
-                // НОВЫЙ КЛЮЧ ДЛЯ ЧИСТОЙ ЗАГРУЗКИ (financeX_v4)
-                let initialTxs = [];
-                try { initialTxs = JSON.parse(localStorage.getItem('financeX_v4')) || []; } catch(e) {}
+                // STORAGE V5
+                let initialTxs = [], initialCats = [];
+                try { 
+                    initialTxs = JSON.parse(localStorage.getItem('financeX_v5')) || []; 
+                    initialCats = JSON.parse(localStorage.getItem('financeX_cats_v5')) || [];
+                } catch(e) {}
+                
                 const transactions = ref(Array.isArray(initialTxs) ? initialTxs : []);
+                const categories = ref(initialCats.length ? initialCats : [...DEFAULT_CATS]);
+                const budgets = ref({});
                 
                 const activeMonth = ref(new Date().toISOString().slice(0, 7));
                 const isLight = ref(localStorage.getItem('financeX_theme') === 'light');
@@ -278,20 +293,22 @@
                 const currentStep = ref(1);
                 const mainInput = ref(null);
                 const importMsg = ref('');
+                const jsonMsg = ref('');
                 const wizard = ref({ type: 'expense', amount: '', category: '', name: '', date: '' });
 
-                // THEME TOGGLE
+                // THEME
                 const toggleTheme = () => {
                     isLight.value = !isLight.value;
                     localStorage.setItem('financeX_theme', isLight.value ? 'light' : 'dark');
                     document.body.classList.toggle('light-theme', isLight.value);
                 };
+                onMounted(() => { if(isLight.value) document.body.classList.add('light-theme'); });
 
-                onMounted(() => {
-                    if(isLight.value) document.body.classList.add('light-theme');
-                });
-
-                const saveData = () => localStorage.setItem('financeX_v4', JSON.stringify(transactions.value));
+                // UTILS
+                const saveData = () => {
+                    localStorage.setItem('financeX_v5', JSON.stringify(transactions.value));
+                    localStorage.setItem('financeX_cats_v5', JSON.stringify(categories.value));
+                };
                 const getCatIcon = (n) => categories.value.find(c => c.name === n)?.icon || '📦';
                 const getCatColor = (n) => categories.value.find(c => c.name === n)?.color || '#3b82f6';
                 const formatDate = (d) => (d || '').split('-').reverse().join('.');
@@ -357,20 +374,57 @@
                         saveData(); sessionMode.value = false; window.scrollTo({top: 0});
                     }
                 };
-
                 const deleteTx = (id) => { if(confirm('Безвозвратно удалить?')) { transactions.value = transactions.value.filter(t => t.id !== id); saveData(); } };
                 
-                // DEMO DATA GENERATOR
-                const loadDemoData = () => {
-                    const demo = []; const now = new Date(); const y = now.getFullYear(); const m = String(now.getMonth() + 1).padStart(2, '0');
-                    demo.push({ id: 1, name: 'Зарплата', amount: 3500, cat: 'Зарплата', date: `${y}-${m}-01` });
-                    demo.push({ id: 2, name: 'Аренда квартиры', amount: -1200, cat: 'Дом', date: `${y}-${m}-02` });
-                    demo.push({ id: 3, name: 'Prisma Supermarket', amount: -145.50, cat: 'Продукты', date: `${y}-${m}-05` });
-                    demo.push({ id: 4, name: 'Spotify & Netflix', amount: -21.98, cat: 'Подписки', date: `${y}-${m}-06` });
-                    demo.push({ id: 5, name: 'Wolt Delivery', amount: -34.00, cat: 'Рестораны', date: `${y}-${m}-08` });
-                    demo.push({ id: 6, name: 'Zara', amount: -89.90, cat: 'Одежда', date: `${y}-${m}-12` });
-                    transactions.value = demo.sort((a,b) => b.date.localeCompare(a.date));
-                    activeMonth.value = `${y}-${m}`; saveData(); showSettings.value = false;
+                // BACKUP JSON LOGIC (Migrate from old finance-io format)
+                const exportJSON = () => {
+                    const data = {
+                        version: 5,
+                        exportedAt: new Date().toISOString(),
+                        transactions: transactions.value,
+                        categories: categories.value,
+                    };
+                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `finance-x-${new Date().toISOString().slice(0, 10)}.json`;
+                    a.click(); URL.revokeObjectURL(a.href);
+                };
+
+                const triggerJSON = () => document.getElementById('jsonFile').click();
+                const importJSON = (e) => {
+                    const file = e.target.files[0]; if (!file) return;
+                    const r = new FileReader();
+                    r.onload = (ev) => {
+                        try {
+                            const p = JSON.parse(ev.target.result);
+                            if (!p.transactions || !Array.isArray(p.transactions)) throw new Error('Bad format');
+                            
+                            // Merge transactions
+                            const existingIds = new Set(transactions.value.map(t => t.id));
+                            const newTxs = p.transactions.filter(t => !existingIds.has(t.id));
+                            transactions.value = [...transactions.value, ...newTxs].sort((a,b) => b.date.localeCompare(a.date));
+                            
+                            // Map Categories (Backwards compatible with old CAT_ICONS/CAT_COLORS)
+                            const catsMap = new Map(categories.value.map(c => [c.name, c]));
+                            if (p.customCategories) p.customCategories.forEach(c => !catsMap.has(c.name) && catsMap.set(c.name, c));
+                            if (p.CAT_ICONS) {
+                                Object.entries(p.CAT_ICONS).forEach(([name, icon]) => {
+                                    if (!catsMap.has(name)) catsMap.set(name, { name, icon, color: (p.CAT_COLORS && p.CAT_COLORS[name]) || '#3b82f6' });
+                                });
+                            }
+                            if (p.categories) p.categories.forEach(c => !catsMap.has(c.name) && catsMap.set(c.name, c));
+                            
+                            categories.value = Array.from(catsMap.values());
+                            
+                            saveData();
+                            jsonMsg.value = `УСПЕХ: +${newTxs.length} операций.`;
+                            setTimeout(() => { showSettings.value = false; jsonMsg.value = ''; }, 2000);
+                        } catch(err) {
+                            jsonMsg.value = `ОШИБКА: Файл поврежден.`;
+                        }
+                    };
+                    r.readAsText(file);
                 };
 
                 // CSV
@@ -403,14 +457,26 @@
                     r.readAsText(file, 'UTF-8');
                 };
 
-                const hardReset = () => { if(confirm("Удалить ВСЁ?")) { transactions.value = []; saveData(); showSettings.value = false; } };
+                const hardReset = () => { if(confirm("Удалить ВСЁ?")) { transactions.value = []; categories.value = [...DEFAULT_CATS]; saveData(); showSettings.value = false; } };
+
+                // DEMO
+                const loadDemoData = () => {
+                    const demo = []; const now = new Date(); const y = now.getFullYear(); const m = String(now.getMonth() + 1).padStart(2, '0');
+                    demo.push({ id: 1, name: 'Зарплата', amount: 3500, cat: 'Зарплата', date: `${y}-${m}-01` });
+                    demo.push({ id: 2, name: 'Аренда квартиры', amount: -1200, cat: 'Дом', date: `${y}-${m}-02` });
+                    demo.push({ id: 3, name: 'Prisma Supermarket', amount: -145.50, cat: 'Продукты', date: `${y}-${m}-05` });
+                    demo.push({ id: 4, name: 'Spotify & Netflix', amount: -21.98, cat: 'Подписки', date: `${y}-${m}-06` });
+                    demo.push({ id: 5, name: 'Wolt Delivery', amount: -34.00, cat: 'Рестораны', date: `${y}-${m}-08` });
+                    transactions.value = demo.sort((a,b) => b.date.localeCompare(a.date));
+                    activeMonth.value = `${y}-${m}`; saveData(); showSettings.value = false;
+                };
 
                 return { 
                     transactions, categories, activeMonth, availableMonths, filteredTxs,
                     monthIncome, monthExpense, monthBalance, sparklinePoints, forecast, smartInsight,
                     sessionMode, showSettings, currentStep, wizard, mainInput, isLight, toggleTheme,
                     startSession, selectCategory, nextStep, deleteTx, getCatIcon, getCatColor, formatDate, 
-                    triggerCSV, importCSV, importMsg, hardReset, loadDemoData
+                    triggerCSV, importCSV, importMsg, exportJSON, triggerJSON, importJSON, jsonMsg, hardReset, loadDemoData
                 };
             }
         }).mount('#app');
